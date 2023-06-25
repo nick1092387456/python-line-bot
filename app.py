@@ -112,7 +112,12 @@ def handle_image_message(event):
     # 回傳訊息
     line_bot_api.reply_message(event.reply_token, reply_message)
     
-
+    # 刪除圖片
+    if os.path.exists(image_path):
+        os.remove(image_path)
+        print(f"{image_path} 已成功刪除")
+    else:
+        print("檔案不存在，無法刪除")
 
 
 if __name__ == "__main__":
