@@ -28,16 +28,17 @@ from linebot.models import (
     ButtonsTemplate,
     PostbackAction,
     MessageAction,
+    ImageMessage,
     URIAction,
     CarouselTemplate,
     CarouselColumn
 )
 
-from modules.reply import faq, menu
-from modules.currency import get_exchange_table
+# from modules.reply import faq, menu
+# from modules.currency import get_exchange_table
 
-table = get_exchange_table()
-print(table)
+# table = get_exchange_table()
+# print(table)
 
 # 定義應用程式是一個Flask類別產生的實例
 app = Flask(__name__)
@@ -75,50 +76,39 @@ def callback():
 # ********* 以上為 X-LINE-SIGNATURE 驗證程序 *********
 
 
-# 文字訊息傳入時的處理器
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    # 當有文字訊息傳入時
-    # event.message.text : 使用者輸入的訊息內容
+# 圖片訊息傳入時的處理器
+from pyzbar.pyzbar import decode
+from pyzbar.pyzbar import decode
+from PIL import Image
+@handler.add(MessageEvent, message=ImageMessage)
+def handle_image_message(event):
+    # 當有圖片訊息傳入時
     print('*'*30)
-    print('[使用者傳入文字訊息]')
-    print(str(event))
-    # 取得使用者說的文字
-    user_msg = event.message.text
-    # 預設回應是選單
-    reply = menu
-    if user_msg in faq:
-        reply = faq[user_msg]
-    elif user_msg in table:
-        bid = table[user_msg]["bid"]
-        offer = table[user_msg]["offer"]
-        report = f"{user_msg} 買價:{bid} 賣價:{offer}"
-        reply = TextSendMessage(text=report)
-
-    # 回傳訊息
-    # 若需要回覆多筆訊息可使用
-    # line_bot_api.reply_message(token, [Object, Object, ...])
-    line_bot_api.reply_message(
-        event.reply_token,
-        reply)
-
-
-# 貼圖訊息傳入時的處理器 
-@handler.add(MessageEvent, message=StickerMessage)
-def handle_sticker_message(event):
-    # 當有貼圖訊息傳入時
-    print('*'*30)
-    print('[使用者傳入貼圖訊息]')
+    print('[使用者傳入圖片訊息]')
     print(str(event))
 
-    # 準備要回傳的貼圖訊息
-    # HINT: 機器人可用的貼圖 https://devdocs.line.me/files/sticker_list.pdf
-    reply = StickerSendMessage(package_id='2', sticker_id='149')
+    # 下載圖片
+    message_content = line_bot_api.get_message_content(event.message.id)
+    image_folder = 'image'
+    image_path = os.path.join(image_folder, event.message.id + '.jpg')
+    with open(image_path, 'wb') as file:
+        for chunk in message_content.iter_content():
+            file.write(chunk)
+    # 解析圖片
+    qr_data = decode(Image.open(image_path))        
+
+     # 準備要回傳的訊息
+    if qr_data:
+        # 若成功解析到 QR 碼
+        qr_content = qr_data[0].data.decode('utf-8')
+        reply_message = TextSendMessage(text=qr_content)
+    else:
+        # 若未解析到 QR 碼
+        reply_message = TextSendMessage(text='未能解析到 QR 碼')
 
     # 回傳訊息
-    line_bot_api.reply_message(
-        event.reply_token,
-        reply)
+    line_bot_api.reply_message(event.reply_token, reply_message)
+    
 
 
 
