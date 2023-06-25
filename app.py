@@ -78,7 +78,6 @@ def callback():
 
 # 圖片訊息傳入時的處理器
 from pyzbar.pyzbar import decode
-from pyzbar.pyzbar import decode
 from PIL import Image
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image_message(event):
