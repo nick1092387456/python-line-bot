@@ -4,3 +4,4 @@ pyquery
 python-dotenv
 pyzbar
 Pillow
+zbar==0.23.1
