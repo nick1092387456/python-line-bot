@@ -1,6 +1,9 @@
 # 運行以下程式需安裝模組: line-bot-sdk, flask, pyquery
 # 安裝方式，輸入指令: pip install 模組名稱
 
+# 引入os模組
+import os
+
 # 引入flask模組
 from flask import Flask, request, abort
 # 引入linebot相關模組
@@ -39,10 +42,14 @@ print(table)
 # 定義應用程式是一個Flask類別產生的實例
 app = Flask(__name__)
 
+# 引入環境變數
+from dotenv import load_dotenv
+load_dotenv()
+
 # LINE的Webhook為了辨識開發者身份所需的資料
 # 相關訊息進入網址(https://developers.line.me/console/)
-CHANNEL_ACCESS_TOKEN = '8csI6709an//rPAuSDj2r28bYPzhOlDj8j854S7n+AlBv73YNFkJF3nH5eEOe50GIiZXhZp5gvOVhdjnvjZaeoUNW2rsmZCnBsjPRys679thOiH292GwwIQ6RzN75AecQ6hhV9AD4Goyo3jFIwD/LQdB04t89/1O/w1cDnyilFU='
-CHANNEL_SECRET = 'a537f3a434f4c9cf29b4b9960205d456'
+CHANNEL_ACCESS_TOKEN = os.getenv('CHANNEL_ACCESS_TOKEN')
+CHANNEL_SECRET = os.getenv('CHANNEL_SECRET')
 
 # ********* 以下為 X-LINE-SIGNATURE 驗證程序 *********
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
@@ -114,7 +121,7 @@ def handle_sticker_message(event):
         reply)
 
 
-import os
+
 if __name__ == "__main__":
     print('[伺服器開始運行]')
     # 取得遠端環境使用的連接端口，若是在本機端測試則預設開啟於port=5500
@@ -122,5 +129,13 @@ if __name__ == "__main__":
     # 使app開始在此連接端口上運行
     print(f'[Flask運行於連接端口:{port}]')
     # 本機測試使用127.0.0.1, debug=True
-    # Heroku部署使用 0.0.0.0
-    app.run(host='127.0.0.1', port=port, debug=True)
+    
+    # Heroku部署使用
+    if 'DYNO' in os.environ:
+        # Heroku部署使用 0.0.0.0
+        host = '0.0.0.0'
+    else:
+        # 本機測試使用
+        host = '127.0.0.1'
+
+    app.run(host=host, port=port, debug=True)
