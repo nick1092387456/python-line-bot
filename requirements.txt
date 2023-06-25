@@ -4,4 +4,3 @@ pyquery
 python-dotenv
 pyzbar
 Pillow
-zbar
