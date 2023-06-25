@@ -96,6 +96,8 @@ def handle_image_message(event):
     # 下載圖片
     message_content = line_bot_api.get_message_content(event.message.id)
     image_folder = 'image'
+    if not os.path.exists(image_folder):
+        os.makedirs(image_folder)
     image_path = os.path.join(image_folder, event.message.id + '.jpg')
     with open(image_path, 'wb') as file:
         for chunk in message_content.iter_content():
