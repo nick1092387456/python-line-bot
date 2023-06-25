@@ -3,6 +3,12 @@
 
 # 引入os模組
 import os
+# 取得專案的根目錄路徑
+project_root = os.path.dirname(os.path.abspath(__file__))
+# 構建 static/zbar 的完整路徑
+zbar_path = os.path.join(project_root, 'static', 'zbar')
+# 設定 LD_LIBRARY_PATH 環境變數
+os.environ['LD_LIBRARY_PATH'] = zbar_path
 
 # 引入flask模組
 from flask import Flask, request, abort
@@ -94,8 +100,7 @@ def handle_image_message(event):
     with open(image_path, 'wb') as file:
         for chunk in message_content.iter_content():
             file.write(chunk)
-    # 設定 zbar 的共享程式庫路徑
-    os.environ['PATH'] += ':./static/zbar'
+   
     # 解析圖片
     qr_data = decode(Image.open(image_path))        
 
