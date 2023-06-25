@@ -78,6 +78,7 @@ def callback():
 
 # 圖片訊息傳入時的處理器
 from pyzbar.pyzbar import decode
+
 from PIL import Image
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image_message(event):
@@ -93,6 +94,8 @@ def handle_image_message(event):
     with open(image_path, 'wb') as file:
         for chunk in message_content.iter_content():
             file.write(chunk)
+    # 設定 zbar 的共享程式庫路徑
+    os.environ['PATH'] += ':./static/zbar'
     # 解析圖片
     qr_data = decode(Image.open(image_path))        
 
